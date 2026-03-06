@@ -145,9 +145,6 @@ flutter run -d chrome
 
 ## Author
 
-Developed by Rafah Bashar
+Developed by Rafa Fahed
 
-```
-
-إذا بدك، أرتبلك كمان **تعليق التسليم الجاهز لتريلو بالإنجليزي**.
-```
+`````
