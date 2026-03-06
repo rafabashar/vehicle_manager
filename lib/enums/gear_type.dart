@@ -1,0 +1,4 @@
+enum GearType {
+  normal,
+  automatic
+}
