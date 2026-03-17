@@ -1,3 +1,5 @@
+/*
+
 import 'package:flutter/material.dart';
 import '../services/vehicle_manager.dart';
 import '../widgets/vehicle_card.dart';
@@ -38,6 +40,70 @@ class AllVehiclesScreen extends StatelessWidget {
                 onDelete: () {},
               )),
         ],
+      ),
+    );
+  }
+} */
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../bloc/vehicle/vehicle_bloc.dart';
+import '../bloc/vehicle/vehicle_state.dart';
+
+import '../widgets/vehicle_card.dart';
+import 'vehicle_details_screen.dart';
+
+class AllVehiclesScreen extends StatelessWidget {
+  const AllVehiclesScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("All Vehicles")),
+      body: BlocBuilder<VehicleBloc, VehicleState>(
+        builder: (context, state) {
+          if (state is VehicleLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is VehicleError) {
+            return Center(child: Text(state.message));
+          }
+          if (state is! VehicleLoaded) {
+            return const SizedBox.shrink();
+          }
+
+          return ListView(
+            padding: const EdgeInsets.all(12),
+            children: [
+              const Text("Cars", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ...state.cars.map((v) => VehicleCard(
+                    vehicle: v,
+                    onOpen: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VehicleDetailsScreen(vehicle: v))),
+                    onEdit: () {},
+                    onDelete: () {},
+                  )),
+              const SizedBox(height: 12),
+
+              const Text("Motorcycles", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ...state.motorcycles.map((v) => VehicleCard(
+                    vehicle: v,
+                    onOpen: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VehicleDetailsScreen(vehicle: v))),
+                    onEdit: () {},
+                    onDelete: () {},
+                  )),
+              const SizedBox(height: 12),
+
+              const Text("Trucks", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ...state.trucks.map((v) => VehicleCard(
+                    vehicle: v,
+                    onOpen: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VehicleDetailsScreen(vehicle: v))),
+                    onEdit: () {},
+                    onDelete: () {},
+                  )),
+            ],
+          );
+        },
       ),
     );
   }

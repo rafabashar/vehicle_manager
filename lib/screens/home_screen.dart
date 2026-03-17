@@ -1,3 +1,5 @@
+/*
+
 import 'package:flutter/material.dart';
 
 import '../services/vehicle_manager.dart';
@@ -209,6 +211,182 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+} */
+
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../bloc/vehicle/vehicle_bloc.dart';
+import '../bloc/vehicle/vehicle_event.dart';
+import '../bloc/vehicle/vehicle_state.dart';
+
+import '../enums/vehicle_type.dart';
+
+import '../widgets/vehicle_card.dart';
+
+import 'add_vehicle_screen.dart';
+import 'search_screen.dart';
+import 'vehicle_details_screen.dart';
+import 'all_vehicles_screen.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  void _openAdd(BuildContext context, {String? editType, dynamic editVehicle}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddVehicleScreen(
+          isEdit: editVehicle != null,
+          editType: editType,
+          editVehicle: editVehicle,
+        ),
+      ),
+    );
+  }
+
+  void _openSearch(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const SearchScreen()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Vehicle Manager"),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: "Cars"),
+              Tab(text: "Motorcycles"),
+              Tab(text: "Trucks"),
+            ],
+          ),
+          actions: [
+            IconButton(
+              tooltip: "Print All (Console)",
+              onPressed: () => context.read<VehicleBloc>().repo.printAllConsole(),
+              icon: const Icon(Icons.print),
+            ),
+            IconButton(
+              tooltip: "All Vehicles",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AllVehiclesScreen()),
+                );
+              },
+              icon: const Icon(Icons.view_list),
+            ),
+            IconButton(
+              tooltip: "Search",
+              onPressed: () => _openSearch(context),
+              icon: const Icon(Icons.search),
+            ),
+            IconButton(
+              tooltip: "Add Vehicle",
+              onPressed: () => _openAdd(context),
+              icon: const Icon(Icons.add),
+            ),
+          ],
+        ),
+
+        body: BlocBuilder<VehicleBloc, VehicleState>(
+          builder: (context, state) {
+            if (state is VehicleLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (state is VehicleError) {
+              return Center(child: Text(state.message));
+            }
+
+            if (state is! VehicleLoaded) {
+              return const SizedBox.shrink();
+            }
+
+            return TabBarView(
+              children: [
+                // Cars
+                ListView.builder(
+                  itemCount: state.cars.length,
+                  itemBuilder: (context, i) {
+                    final car = state.cars[i];
+                    return VehicleCard(
+                      vehicle: car,
+                      onOpen: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => VehicleDetailsScreen(vehicle: car)),
+                        );
+                      },
+                      onEdit: () => _openAdd(context, editType: "car", editVehicle: car),
+                      onDelete: () {
+                        context.read<VehicleBloc>().add(
+                              DeleteVehicleEvent(car.plateNum.toString(), VehicleType.car),
+                            );
+                      },
+                    );
+                  },
+                ),
+
+                // Motorcycles
+                ListView.builder(
+                  itemCount: state.motorcycles.length,
+                  itemBuilder: (context, i) {
+                    final m = state.motorcycles[i];
+                    return VehicleCard(
+                      vehicle: m,
+                      onOpen: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => VehicleDetailsScreen(vehicle: m)),
+                        );
+                      },
+                      onEdit: () => _openAdd(context, editType: "motorcycle", editVehicle: m),
+                      onDelete: () {
+                        context.read<VehicleBloc>().add(
+                              DeleteVehicleEvent(m.plateNum.toString(), VehicleType.motorcycle),
+                            );
+                      },
+                    );
+                  },
+                ),
+
+                // Trucks
+                ListView.builder(
+                  itemCount: state.trucks.length,
+                  itemBuilder: (context, i) {
+                    final t = state.trucks[i];
+                    return VehicleCard(
+                      vehicle: t,
+                      onOpen: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => VehicleDetailsScreen(vehicle: t)),
+                        );
+                      },
+                      onEdit: () => _openAdd(context, editType: "truck", editVehicle: t),
+                      onDelete: () {
+                        context.read<VehicleBloc>().add(
+                              DeleteVehicleEvent(t.plateNum.toString(), VehicleType.truck),
+                            );
+                      },
+                    );
+                  },
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
