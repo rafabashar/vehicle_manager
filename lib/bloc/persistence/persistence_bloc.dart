@@ -24,7 +24,7 @@ class PersistenceBloc extends Bloc<PersistenceEvent, PersistenceState> {
   Future<void> _onSave(PersistSaveEvent event, Emitter<PersistenceState> emit) async {
     try {
       emit(PersistenceSaving()); // مهم: قبل ما يخلص الحفظ
-      await repo.save();
+      await repo.saveCacheOnly();
       emit(PersistenceIdle());
     } catch (e) {
       emit(PersistenceError(e.toString()));
